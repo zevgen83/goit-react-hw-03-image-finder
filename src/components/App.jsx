@@ -24,8 +24,8 @@ export class App extends Component {
     const { page, perPage, namePhoto, totalPages } = this.state;
 
     if (prevState.namePhoto !== namePhoto || prevState.page !== page) {
+      this.setState({ isLoading: true, isVisibleBtn: false });
       try {
-        this.setState({ isLoading: true });
         const data = await fetchApi(namePhoto, page, perPage);
 
         const {
@@ -34,13 +34,12 @@ export class App extends Component {
 
         this.setState(({ photos }) => ({
           photos: [...photos, ...hits],
-          isVisibleBtn: true,
           totalPages: Math.ceil(totalHits / perPage),
         }));
       } catch (error) {
         Notify.failure('Sorry, try again');
       } finally {
-        this.setState({ isLoading: false });
+        this.setState({ isLoading: false, isVisibleBtn: true });
       }
 
       if (totalPages === page) {
@@ -85,7 +84,6 @@ export class App extends Component {
     return (
       <div className={css.App}>
         <SearchBar onSubmit={this.handleFormSubmit} />
-        {isLoading && <Loader />}
         {photos.length !== 0 && (
           <>
             <ImageGallery photos={photos} openModal={this.onOpenModal} />
@@ -94,6 +92,7 @@ export class App extends Component {
             )}
           </>
         )}
+        {isLoading && <Loader />}
         {currentPhoto && (
           <Modal showModal={currentPhoto} closeModal={this.onCloseModal} />
         )}
